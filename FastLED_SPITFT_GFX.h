@@ -18,16 +18,26 @@
   <http://www.gnu.org/licenses/>.
   --------------------------------------------------------------------*/
 
-#ifndef _SMARTMATRIX_GFX_H_
-#define _SMARTMATRIX_GFX_H_
+#ifndef _FastLED_SPITFT_GFX_H_
+#define _FastLED_SPITFT_GFX_H_
 #include "Framebuffer_GFX.h"
+#include "Adafruit_SPITFT.h"
 #include "FastLED.h"
 
-class SmartMatrix_GFX : public Framebuffer_GFX {
+class FastLED_SPITFT_GFX : public Framebuffer_GFX {
+  public:
+    FastLED_SPITFT_GFX(CRGB *, uint8_t w, uint8_t h, Adafruit_SPITFT* spitft);
+    void show();
 
- public:
-  SmartMatrix_GFX(CRGB *, uint8_t w, uint8_t h, void (* showptr)());
+  protected:
+    Adafruit_SPITFT* _spitft;
+
+  private:
+    static const uint16_t lcdw = 96;
+    static const uint16_t lcdh = 64;
+    // temporary storage for rotation and 24bit to 16bit convertion
+    uint16_t _line[lcdw];
 };
 
-#endif // _SMARTMATRIX_GFX_H_
-// vim:sts=2:sw=2
+#endif // _FastLED_SPITFT_GFX_H_
+// vim:sts=4:sw=4

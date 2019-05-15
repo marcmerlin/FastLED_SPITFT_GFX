@@ -1,16 +1,14 @@
-// SmartMatrix_GFX example for single NeoPixel Shield.
+// FastLED_SPITFT_GFX example for single NeoPixel Shield.
 // By Marc MERLIN <marc_soft@merlins.org>
 // Contains code (c) Adafruit, license BSD
 
 // Please see the other demos and FastLED_NeoMatrix_SmartMatrix_LEDMatrix_GFX_Demos/neomatrix_config.h
 // on how to avoid having all the config pasted in all your scripts.
 
-#include <Adafruit_GFX.h>
-#include <SmartMatrix_GFX.h>
-// CHANGEME, see MatrixHardware_ESP32_V0.h in SmartMatrix/src
-#define GPIOPINOUT 3
-#include <SmartLEDShieldV4.h>  // comment out this line for if you're not using SmartLED Shield V4 hardware (this line needs to be before #include <SmartMatrix3.h>)
-#include <SmartMatrix3.h>
+#include <Adafruit_SSD1331.h>
+#include <FastLED_SPITFT_GFX.h>
+#include <FastLED.h>
+#include <SPI.h>
 
 // Choose your prefered pixmap
 //#include "heart24.h"
@@ -24,37 +22,42 @@
 
 // ========================== CONFIG START ===================================================
 
-/// SmartMatrix Defines
-#define COLOR_DEPTH 24                  // known working: 24, 48 - If the sketch uses type `rgb24` directly, COLOR_DEPTH must be 24
-#define kMatrixWidth  64       // known working: 32, 64, 96, 128
-#define kMatrixHeight 32       // known working: 16, 32, 48, 64
-const uint8_t kRefreshDepth = 24;       // known working: 24, 36, 48
-const uint8_t kDmaBufferRows = 2;       // known working: 2-4, use 2 to save memory, more to keep from dropping frames and automatically lowering refresh rate
-const uint8_t kPanelType = SMARTMATRIX_HUB75_32ROW_MOD16SCAN;   // use SMARTMATRIX_HUB75_16ROW_MOD8SCAN for common 16x32 panels
-//const uint8_t kPanelType = SMARTMATRIX_HUB75_64ROW_MOD32SCAN;
-const uint8_t kMatrixOptions = (SMARTMATRIX_OPTIONS_NONE);      // see http://docs.pixelmatix.com/SmartMatrix for options
-const uint8_t kBackgroundLayerOptions = (SM_BACKGROUND_OPTIONS_NONE);
+/*
+SD1331 Pin	    Arduino	ESP8266		rPi
+1 GND
+2 VCC
+3 SCL/SCK/CLK/D0	13	GPIO14/D5	GPIO11/SPI0-SCLK	
+4 SDA/MOSI/D1		11	GPIO13/D7	GPIO10/SPI0-MOSI	
+5 RES/RST		9	GPIO15/D8	GPIO24			
+6 DC/A0 (data)		8	GPIO05/D1	GPIO23			
+7 CS			10	GPIO04/D2	GPIO08		
+*/
+// You can use any (4 or) 5 pins
+// hwspi hardcodes those pins, no need to redefine them
+#define sclk 14
+#define mosi 13
+#define cs   4
+#define rst  15
+#define dc   5
 
-SMARTMATRIX_ALLOCATE_BUFFERS(matrixLayer, kMatrixWidth, kMatrixHeight, kRefreshDepth, kDmaBufferRows, kPanelType, kMatrixOptions);
-SMARTMATRIX_ALLOCATE_BACKGROUND_LAYER(backgroundLayer, kMatrixWidth, kMatrixHeight, COLOR_DEPTH, kBackgroundLayerOptions);
+// Option 1: use any pins but a little slower
+//#pragma message "Using SWSPI"
+//Adafruit_SSD1331 display = Adafruit_SSD1331(cs, dc, mosi, sclk, rst);
 
-const int defaultBrightness = (100*255)/100;        // full (100%) brightness
-//const int defaultBrightness = (15*255)/100;       // dim: 15% brightness
+// Option 2: must use the hardware SPI pins
+// (for UNO thats sclk = 13 and sid = 11) and pin 10 must be
+// an output. This is much faster - also required if you want
+// to use the microSD card (see the image drawing example)
+#pragma message "Using HWSPI"
+Adafruit_SSD1331 *display = new Adafruit_SSD1331(&SPI, cs, dc, rst);
 
-#define mw kMatrixWidth
-#define mh kMatrixHeight
-#define NUMMATRIX (kMatrixWidth*kMatrixHeight)
 
-CRGB *matrixleds;
+#define mw 96
+#define mh 64
+CRGB matrixleds[mw*mh];;
 
-void show_callback();
-SmartMatrix_GFX *matrix = new SmartMatrix_GFX(matrixleds, mw, mh, show_callback);
-// Sadly this callback function must be copied around with this init code
-void show_callback() {
-    backgroundLayer.swapBuffers(true);
-    matrixleds = (CRGB *)backgroundLayer.backBuffer();
-    matrix->newLedsPtr(matrixleds);
-}
+
+FastLED_SPITFT_GFX *matrix = new FastLED_SPITFT_GFX(matrixleds, mw, mh, display);
 
 // ========================== CONFIG END ======================================================
 
@@ -652,19 +655,13 @@ void loop() {
 }
 
 void setup() {
-    matrixLayer.addLayer(&backgroundLayer); 
-    matrixLayer.begin();
-    matrixLayer.setBrightness(defaultBrightness);
-    // This sets the neomatrix and LEDMatrix pointers
-    show_callback();
-    matrixLayer.setRefreshRate(240);
-    backgroundLayer.enableColorCorrection(true);
-
+    display->begin();
+    Serial.println("For extra speed, try 80Mhz, may be less stable");
+    //display->begin(80000000);
+    display->setTextWrap(false);
+    display->setAddrWindow(0, 0, mw, mh);
     // Time for serial port to work?
     delay(1000);
-    backgroundLayer.fillScreen( {0x80, 0x80, 0x80} );
-    backgroundLayer.swapBuffers();
-
     Serial.begin(115200);
     Serial.print("Matrix Size: ");
     Serial.print(mw);
@@ -682,6 +679,7 @@ void setup() {
     delay(3000);
     matrix->clear();
 #endif
+#if 0
     Serial.println("Running blue/red speed test");
 // You can't use millis to time frame fresh rate because it uses cli() which breaks millis()
 // So I use my stopwatch to count 1000 displays and that's good enough
@@ -695,10 +693,11 @@ void setup() {
 	matrix->show();
     }
     Serial.println("Done running blue/red speed test");
+#endif
 
     // This counts but also shows bleeding between pixels and lines.
     Serial.println("Count pixels. This is slow, you may want to comment me out");
-    count_pixels();
+    //count_pixels();
     Serial.println("Count pixels done");
     delay(1000);
 }
