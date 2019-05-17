@@ -26,17 +26,18 @@
 
 class FastLED_SPITFT_GFX : public Framebuffer_GFX {
   public:
-    FastLED_SPITFT_GFX(CRGB *, uint8_t w, uint8_t h, Adafruit_SPITFT* spitft);
+    FastLED_SPITFT_GFX(CRGB *, uint16_t, uint16_t, uint16_t, uint16_t, Adafruit_SPITFT* spitft, uint8_t rot = 0);
+    uint8_t rotation;
     void show();
+    void begin();
 
   protected:
     Adafruit_SPITFT* _spitft;
 
   private:
-    static const uint16_t lcdw = 96;
-    static const uint16_t lcdh = 64;
+    const uint16_t _lcdw, _lcdh;
     // temporary storage for rotation and 24bit to 16bit convertion
-    uint16_t _line[lcdw];
+    uint16_t *_line;
 };
 
 #endif // _FastLED_SPITFT_GFX_H_
