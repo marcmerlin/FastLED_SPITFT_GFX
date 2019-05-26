@@ -53,8 +53,8 @@ Adafruit_SSD1331 *display = new Adafruit_SSD1331(&SPI, cs, dc, rst);
 
 
 // You can either have a 96x64 display (default == 0), or rotated 64x96 (1)
-//#define portrait
-#ifdef portrait
+//#define landscape
+#ifdef landscape
 #define mw 96
 #define mh 64
 CRGB matrixleds[mw*mh];;

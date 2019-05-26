@@ -17,8 +17,12 @@ FastLED_SPITFT_GFX::FastLED_SPITFT_GFX(CRGB *fb, const uint16_t fbw, const uint1
 }
 
 void FastLED_SPITFT_GFX::begin() {
-    while ((_line = (uint16_t *) malloc(_tftw * 2)) == NULL) Serial.println("malloc failed");
+    uint16_t ms = _tftw * 2;
+    Serial.print("Malloc FastLED_SPITFT_GFX _line for transpositions, bytes: ");
+    Serial.println(ms);
+    while ((_line = (uint16_t *) malloc(ms)) == NULL) Serial.println("malloc failed");
     Framebuffer_GFX::begin();
+    Framebuffer_GFX::show_free_mem();
 }
 
 
