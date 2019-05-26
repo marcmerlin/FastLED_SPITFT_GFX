@@ -10,40 +10,48 @@
 #include <FastLED_SPITFT_GFX.h>
 
 FastLED_SPITFT_GFX::FastLED_SPITFT_GFX(CRGB *fb, const uint16_t fbw, const uint16_t fbh, 
-	const uint16_t lcdw, const uint16_t lcdh, Adafruit_SPITFT* spitft, uint8_t rot): 
-  Framebuffer_GFX(fb, fbw, fbh, NULL), _lcdw(lcdw), _lcdh(lcdh) { 
+	const uint16_t tftw, const uint16_t tfth, Adafruit_SPITFT* spitft, uint8_t rot): 
+  Framebuffer_GFX(fb, fbw, fbh, NULL), _tftw(tftw), _tfth(tfth) { 
       rotation = rot;
       _spitft = spitft;
 }
 
 void FastLED_SPITFT_GFX::begin() {
-    while ((_line = (uint16_t *) malloc(_lcdw * 2)) == NULL) Serial.println("malloc failed");
+    while ((_line = (uint16_t *) malloc(_tftw * 2)) == NULL) Serial.println("malloc failed");
+    Framebuffer_GFX::begin();
 }
 
 
 void FastLED_SPITFT_GFX::show() {
-#if 0
-    for (uint16_t line = 0; line < lcdh; line++) {
-	for (uint16_t i = 0; i < lcdw; i++) {
-	    _line[i] = Color24to16(CRGBtoint32(_fb[i*matrixWidth + line]));
-	}
+    switch(rotation) {
+    case 0:
+	for (uint16_t tftline = 0; tftline < _tfth; tftline++) {
+	    for (uint16_t i = 0; i < _tftw; i++) {
+		_line[i] = Color24to16(CRGBtoint32(_fb[tftline*matrixWidth + i]));
+	    }
 
-	_spitft->startWrite();
-	_spitft->writePixels(_line, lcdw);
-	_spitft->endWrite();
-	yield();
-    }
-#endif
-    for (uint16_t line = 0; line < _lcdh; line++) {
-	for (uint16_t i = 0; i < _lcdw; i++) {
-	    _line[i] = Color24to16(CRGBtoint32(_fb[line*matrixWidth + i]));
+	    yield();
+	    _spitft->startWrite();
+	    _spitft->writePixels(_line, _tftw);
+	    _spitft->endWrite();
 	}
+	break;
 
-	yield();
-	_spitft->startWrite();
-	_spitft->writePixels(_line, _lcdw);
-	_spitft->endWrite();
+	// tftw =96; tfth=64, width = 64 height 96
+    case 1:
+	for (uint16_t tftline = 0; tftline < _tfth; tftline++) {
+	    for (uint16_t i = 0; i < _tftw; i++) {
+		_line[_tftw-i-1] = Color24to16(CRGBtoint32(_fb[i*matrixWidth + tftline]));
+	    }
+
+	    yield();
+	    _spitft->startWrite();
+	    _spitft->writePixels(_line, _tftw);
+	    _spitft->endWrite();
+	}
+	break;
     }
 }
 
 // vim:sts=4:sw=4
+//

@@ -52,12 +52,22 @@ SD1331 Pin	    Arduino	ESP8266		rPi
 Adafruit_SSD1331 *display = new Adafruit_SSD1331(&SPI, cs, dc, rst);
 
 
+// You can either have a 96x64 display (default == 0), or rotated 64x96 (1)
+//#define portrait
+#ifdef portrait
 #define mw 96
 #define mh 64
 CRGB matrixleds[mw*mh];;
 
+FastLED_SPITFT_GFX *matrix = new FastLED_SPITFT_GFX(matrixleds, mw, mh, 96, 64, display, 0);
+#else
+#define mw 64
+#define mh 96
+CRGB matrixleds[mw*mh];;
 
-FastLED_SPITFT_GFX *matrix = new FastLED_SPITFT_GFX(matrixleds, mw, mh, display);
+FastLED_SPITFT_GFX *matrix = new FastLED_SPITFT_GFX(matrixleds, mw, mh, 96, 64, display, 1);
+#endif
+
 
 // ========================== CONFIG END ======================================================
 
@@ -655,18 +665,14 @@ void loop() {
 }
 
 void setup() {
-    display->begin();
-    Serial.println("For extra speed, try 80Mhz, may be less stable");
-    //display->begin(80000000);
-    display->setTextWrap(false);
-    display->setAddrWindow(0, 0, mw, mh);
     // Time for serial port to work?
     delay(1000);
     Serial.begin(115200);
-    Serial.print("Matrix Size: ");
-    Serial.print(mw);
-    Serial.print(" ");
-    Serial.println(mh);
+    // Init TFT display
+    display->begin();
+    Serial.println("For extra speed, try 80Mhz, may be less stable");
+    //display->begin(80000000);
+    // Then we can init the FrameBuffer GFX overlay (some backends require begin, some don't)
     matrix->begin();
     matrix->setTextWrap(false);
     Serial.println("If the code crashes here, decrease the brightness or turn off the all white display below");
