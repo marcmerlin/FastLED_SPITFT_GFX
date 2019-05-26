@@ -12,6 +12,9 @@ you'll need a processor with more RAM (like ESP8266, ESP32, Teensy, etc...), but
 from having the entire framebuffer in memory which is used for code that apply transformations
 to the entire framebuffer like fading or rotations.
 
+https://github.com/marcmerlin/Framebuffer_GFX/blob/master/README.md details the 3 APIs available
+to you and why you'd want to use this layer on top of the SSD1331 driver.
+
 This library requires FastLED and Adafruit_GFX libraries as well as this base class library:
 - https://github.com/marcmerlin/Framebuffer_GFX
 Please look at the Framebuffer_GFX page for details on how the APIs work and you can also look the example demo code:
