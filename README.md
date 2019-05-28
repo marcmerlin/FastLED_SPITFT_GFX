@@ -1,11 +1,19 @@
 FastLED_SPITFT::GFX, TFT Screens Like SSD1331 or ILI9341 with Adafruit GFX and FastLED APIs
 ===========================================================================================
 
+Blog post with more pictures/details: 
+http://marc.merlins.org/perso/arduino/post_2019-05-26_FastLED_SPITFT_GFX-on-top-of-Framebuffer_GFX-_SPI-TFTs-like-SSD1331-or-ILI9341_.html
+
 Adafruit_GFX and FastLED-compatible library for TFT displays like SSD1331 or ILI9341.
 
 Adafruit provides basic GFX support for them, but this library maps a FastLED
 RGB888 (24bit) framebuffer onto those chips (downsampling to 16bit RGB565 color resolution 
 as needed), as well as allows rotating the display when it's not supported like for SSD1331.
+
+![image](https://user-images.githubusercontent.com/1369412/58442520-cdf4b580-80a0-11e9-8612-17fdab509714.png)
+
+This is the same 96x64 display and demo between a P3 RGBPanel and an SSD1331:
+![image](https://user-images.githubusercontent.com/1369412/58442645-5c693700-80a1-11e9-8005-f57b7da63482.png)
 
 The big thing to note is that this library has to store the entire framebuffer in memory, so
 you'll need a processor with more RAM (like ESP8266, ESP32, Teensy, etc...), but then you benefit
