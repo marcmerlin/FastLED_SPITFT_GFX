@@ -1,5 +1,5 @@
-FastLED_SPITFT::GFX, TFT Screens Like SSD1331 or ILI9341 with Adafruit GFX and FastLED APIs
-===========================================================================================
+FastLED_SPITFT::GFX, TFT Screens Like SSD1331, ST7735, or ILI9341 with Adafruit GFX and FastLED APIs
+====================================================================================================
 
 Blog post with more pictures/details: 
 http://marc.merlins.org/perso/arduino/post_2019-05-26_FastLED_SPITFT_GFX-on-top-of-Framebuffer_GFX-_SPI-TFTs-like-SSD1331-or-ILI9341_.html
@@ -12,6 +12,12 @@ as needed), as well as allows rotating the display when it's not supported like 
 
 ![image](https://user-images.githubusercontent.com/1369412/58442520-cdf4b580-80a0-11e9-8612-17fdab509714.png)
 
+SSD1331 (96x64) vs ST7735 (128x128) vs ST7735 (160x128) vs ILI9341 (320x240):
+![image](https://user-images.githubusercontent.com/1369412/59638838-4d106300-910e-11e9-82a2-65223ead57df.png)
+(note that the ESP32 was sending ST7735 160x128 SPI which didn't work at all on SSD1331 and not quite on the ILI screen which requires its own protocol)
+* 128x160 video demo of TableME: https://www.youtube.com/watch?v=0-Fq1s2xQbM
+* 128x128 video demo of Aurora: https://www.youtube.com/watch?v=YwbfFoFp0ko
+
 This is the same 96x64 display and demo between a P3 RGBPanel and an SSD1331:
 ![image](https://user-images.githubusercontent.com/1369412/58442645-5c693700-80a1-11e9-8005-f57b7da63482.png)
 
@@ -21,7 +27,9 @@ from having the entire framebuffer in memory which is used for code that apply t
 to the entire framebuffer like fading or rotations.
 
 https://github.com/marcmerlin/Framebuffer_GFX/blob/master/README.md details the 3 APIs available
-to you and why you'd want to use this layer on top of the SSD1331 driver.
+to you and why you'd want to use this layer on top of the SSD1331 driver.  
+Similarly this driver works great with ST7735 based TFTs (128x128 or 128x160).
+It does also work with ILI9341, but memory becomes an issue as the framebuffer uses 225KB of RAM which only fits on a teensy 3.5/3.6 for me (too big for ESP32) and leaves very little room to run other code.
 
 This library requires FastLED and Adafruit_GFX libraries as well as this base class library:
 - https://github.com/marcmerlin/Framebuffer_GFX
