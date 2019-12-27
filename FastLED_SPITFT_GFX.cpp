@@ -9,9 +9,9 @@
 
 #include <FastLED_SPITFT_GFX.h>
 
-FastLED_SPITFT_GFX::FastLED_SPITFT_GFX(CRGB *fb, const uint16_t fbw, const uint16_t fbh, 
+FastLED_SPITFT_GFX::FastLED_SPITFT_GFX(CRGB *__fb, const uint16_t fbw, const uint16_t fbh,
 	const uint16_t tftw, const uint16_t tfth, Adafruit_SPITFT* spitft, uint8_t rot): 
-  Framebuffer_GFX(fb, fbw, fbh, NULL), _tftw(tftw), _tfth(tfth) { 
+  Framebuffer_GFX(__fb, fbw, fbh, NULL), _tftw(tftw), _tfth(tfth) {
       rotation = rot;
       _spitft = spitft;
 }
@@ -22,7 +22,7 @@ void FastLED_SPITFT_GFX::begin() {
     Serial.println(ms);
     while ((_line = (uint16_t *) malloc(ms)) == NULL) Serial.println("malloc failed");
     Framebuffer_GFX::begin();
-    Framebuffer_GFX::show_free_mem();
+    Framebuffer_GFX::show_free_mem("After FastLED_SPITFT_GFX malloc");
 }
 
 
