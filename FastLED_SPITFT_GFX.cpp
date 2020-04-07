@@ -8,6 +8,9 @@
   -------------------------------------------------------------------------*/
 
 #include <FastLED_SPITFT_GFX.h>
+#ifdef M5STACK
+#include <M5Stack.h>
+#endif
 
 FastLED_SPITFT_GFX::FastLED_SPITFT_GFX(CRGB *__fb, const uint16_t fbw, const uint16_t fbh,
 	const uint16_t tftw, const uint16_t tfth, Adafruit_SPITFT* spitft, uint8_t rot): 
@@ -22,16 +25,20 @@ void FastLED_SPITFT_GFX::begin() {
     Serial.println(ms);
     while ((_line = (uint16_t *) malloc(ms)) == NULL) Serial.println("malloc failed");
     Framebuffer_GFX::begin();
-    Framebuffer_GFX::show_free_mem("After FastLED_SPITFT_GFX malloc");
+    show_free_mem("After FastLED_SPITFT_GFX malloc");
+    setfpsfreq(3000);
 }
 
 
-void FastLED_SPITFT_GFX::show() {
+void FastLED_SPITFT_GFX::show(boolean speedtest) {
+    showfps();
     switch(rotation) {
     case 0:
 	for (uint16_t tftline = 0; tftline < _tfth; tftline++) {
 	    for (uint16_t i = 0; i < _tftw; i++) {
-		_line[i] = Color24to16(CRGBtoint32(_fb[tftline*matrixWidth + i]));
+		// If the FB is in PSRAM, reading from PSRAM is slow, allow bypassing
+		// this for simple writePixels benchmarking
+		if (!speedtest) _line[i] = Color24to16(CRGBtoint32(_fb[tftline*matrixWidth + i]));
 	    }
 
 	    yield();
@@ -45,7 +52,7 @@ void FastLED_SPITFT_GFX::show() {
     case 1:
 	for (uint16_t tftline = 0; tftline < _tfth; tftline++) {
 	    for (uint16_t i = 0; i < _tftw; i++) {
-		_line[_tftw-i-1] = Color24to16(CRGBtoint32(_fb[i*matrixWidth + tftline]));
+		if (!speedtest) _line[_tftw-i-1] = Color24to16(CRGBtoint32(_fb[i*matrixWidth + tftline]));
 	    }
 
 	    yield();
@@ -55,6 +62,18 @@ void FastLED_SPITFT_GFX::show() {
 	}
 	break;
     }
+
+#ifdef M5STACK
+    case 100:
+	for (uint16_t tftline = 0; tftline < _tfth; tftline++) {
+	    for (uint16_t i = 0; i < _tftw; i++) {
+		if (!speedtest) _line[i] = Color24to16(CRGBtoint32(_fb[tftline*matrixWidth + i]));
+	    }
+	    // In M5Display.cpp
+	    M5.Lcd.drawBitmap(0, tftline, _tftw, 1, _line);
+	}
+	break;
+#endif
 }
 
 // vim:sts=4:sw=4

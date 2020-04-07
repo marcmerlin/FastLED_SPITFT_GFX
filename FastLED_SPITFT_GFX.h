@@ -28,7 +28,7 @@ class FastLED_SPITFT_GFX : public Framebuffer_GFX {
   public:
     FastLED_SPITFT_GFX(CRGB *, uint16_t, uint16_t, uint16_t, uint16_t, Adafruit_SPITFT* spitft, uint8_t rot = 0);
     uint8_t rotation;
-    void show();
+    void show(boolean speedtest=0);
     void begin();
 
   protected:
