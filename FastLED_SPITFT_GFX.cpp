@@ -31,7 +31,7 @@ void FastLED_SPITFT_GFX::begin() {
 
 
 void FastLED_SPITFT_GFX::show(boolean speedtest) {
-    showfps();
+    Framebuffer_GFX::showfps();
     switch(rotation) {
     case 0:
 	for (uint16_t tftline = 0; tftline < _tfth; tftline++) {
